@@ -1,7 +1,5 @@
 require 'rubyserial'
 
-require 'numato-gpio/version'
-
 class NumatoGPIO
 
   attr_accessor :device
