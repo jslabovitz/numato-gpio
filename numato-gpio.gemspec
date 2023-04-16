@@ -17,6 +17,6 @@ NumatoGPIO interfaces with Numato GPIO board via USB interface.
 
   s.add_dependency 'rubyserial', '~> 0.6'
 
-  s.add_development_dependency 'bundler', '~> 2.3'
+  s.add_development_dependency 'bundler', '~> 2.4'
   s.add_development_dependency 'rake', '~> 13.0'
 end
