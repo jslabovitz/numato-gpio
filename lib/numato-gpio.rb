@@ -3,27 +3,26 @@ require 'rubyserial'
 class NumatoGPIO
 
   attr_accessor :device
-  attr_accessor :io_map
   attr_accessor :mock
   attr_accessor :verbose
 
   def initialize(params={})
     {
       mock: false,
+      device: nil,
       verbose: false,
-      io_map: {},
     }.merge(params).each { |k, v| send("#{k}=", v) }
     open_device
   end
 
   def open_device
     return if @mock
-    unless @device
-      devices = Dir.glob('/dev/tty.usbmodem*')
-      raise "More than one device: #{devices.join(', ')}" if devices.length > 2
-      @device = devices.first
+    raise "No device set!" unless @device
+    begin
+      @port = Serial.new(@device)
+    rescue RubySerial::Error => e
+      raise "Can't open device #{@device.inspect}: #{e}"
     end
-    @port = Serial.new(@device)
     warn "connected to device #{@device}" if @verbose
   end
 
@@ -41,15 +40,15 @@ class NumatoGPIO
   end
 
   def set(x)
-    command("gpio set #{gpio_str(io_id_to_num(x))}", false)
+    command("gpio set #{gpio_name(x)}", false)
   end
 
   def clear(x)
-    command("gpio clear #{gpio_str(io_id_to_num(x))}", false)
+    command("gpio clear #{gpio_name(x)}", false)
   end
 
   def read(x)
-    status = command("gpio read #{gpio_str(io_id_to_num(x))}", true)
+    status = command("gpio read #{gpio_name(x)}", true)
     case status
     when '1'
       true
@@ -79,28 +78,19 @@ class NumatoGPIO
     end
   end
 
-  IONames = ('0'..'9').to_a + ('A'..'V').to_a.freeze
+  GPIONames = ('0'..'9').to_a + ('A'..'V').to_a.freeze
 
-  def gpio_str(x)
-    IONames[x] or raise "Can't convert GPIO number #{x.inspect} to string"
-  end
-
-  def io_id_to_num(x)
-    case x
-    when Numeric
-      x
-    when Symbol
-      @io_map[x] or raise "No IO ID #{x.inspect}"
-    else
-      raise "Can't convert #{x.class} to IO: #{x.inspect}"
-    end
+  def gpio_name(x)
+    GPIONames[x] or raise "Can't convert GPIO number #{x.inspect} to name"
   end
 
 end
 
 if $0 == __FILE__
 
-  gpio = NumatoGPIO.new(mock: true)
+  gpio = NumatoGPIO.new(device: '/dev/tty.usbmodem1101', verbose: true)
+
+  puts "ID: #{gpio.id}"
 
   gpio.clear(0)
   gpio.clear(1)
