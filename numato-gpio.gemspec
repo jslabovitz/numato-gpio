@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name          = 'numato-gpio'
-  s.version       = '0.1'
+  s.version       = '0.2'
   s.summary       = 'Interfaces with Numato GPIO board via USB interface.'
   s.author        = 'John Labovitz'
   s.email         = 'johnl@johnlabovitz.com'
